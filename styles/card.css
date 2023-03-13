@@ -1,0 +1,15 @@
+:root {
+    --yellow: #fbc324;
+    --white: #faf0e6;
+}
+
+.entry {
+    margin: 5px;
+}
+
+.entry-person {
+}
+
+.entry-date {
+    margin: 0;
+}

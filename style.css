@@ -1,0 +1,13 @@
+:root {
+    --yellow: #fbc324;
+    --white: #faf0e6;
+}
+
+#app {
+    height: 100vh;
+}
+
+#nav-side {
+    background: var(--yellow);
+    min-width: 10vw;
+}
