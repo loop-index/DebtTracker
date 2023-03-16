@@ -1,4 +1,5 @@
 import { loadMyView } from "/screens/mine.js";
+import { loadMainView, loadLoginView, loadSignupView } from "/screens/default.js";
 
 const app = $('#content');
 
@@ -9,12 +10,20 @@ var hash = '#'; // Defaults to: '#'
 window.router = new Navigo(root, useHash, hash);
 
 window.router.on({
-    '/': () => { // This is actually the route
+    '/': () => {
         loadMyView();
     },
     '/another': () => {
         app.innerHTML = 'Now on second page';
         console.log('Now on second page');
+    },
+    '/main': () => {
+    }, 
+    '/login': () => {
+        loadLoginView();
+    },
+    '/signup': () => {
+        loadSignupView();
     }
 }).resolve();
 
