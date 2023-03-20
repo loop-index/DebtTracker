@@ -9,12 +9,14 @@ export const myView = `
         <form class="dropdown-menu p-4" id="newEntryForm">
             <input type="text" class="form-control mb-2" placeholder="Title">
             <input type="text" class="form-control mb-2" placeholder="Amount">
-            <button type="submit" class="btn btn-primary">Create entry</button>
+            <input type="text" class="form-control mb-2" id="recipientInput" placeholder="Recipient" autocomplete="off">
+            <button type="submit" id="newEntrySubmit" class="btn btn-primary">Create entry</button>
         </form>
         <button class="btn btn-secondary" type="button" id="signOut">
             Sign Out
         </button>
     </span>
+    
 </div>
 `
 

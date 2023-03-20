@@ -11,3 +11,7 @@
     background: var(--yellow);
     min-width: 10vw;
 }
+
+#matches {
+    position: absolute;
+}

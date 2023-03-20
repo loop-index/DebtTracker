@@ -1,8 +1,6 @@
-import { AU, FS } from "../firebase.js";
+import { AU, FS, db } from "../firebase.js";
 import { signInWithCustomToken, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js';
-import { doc, getDoc } from "../firebase.js";
-
-
+import { matchDropdown } from "/styles/components.js";
 
 // Create our number formatter.
 export const formatter = new Intl.NumberFormat('en-US', {
@@ -59,10 +57,11 @@ export async function signup(email, password) {
         console.log("Signed in");
 
         // Create user in firestore
-        setDoc(doc(FS, "users", userCredential.user.uid), {
+        FS.setDoc(FS.doc(db, "users", userCredential.user.uid), {
             email: email,
             outgoingTransactions: [],
             incomingTransactions: [],
+            knownUsers: {},
         });
 
         router.navigate("/");
@@ -79,4 +78,60 @@ export async function signup(email, password) {
 function saveCache(userCredential) {
     localStorage.setItem('token', userCredential.user.getIdToken());
     localStorage.setItem('uid', userCredential.user.uid);
+}
+
+export function autocomplete(input, arrayFn) {
+    let array;
+    $(input).on("focus", async function () {
+        array = await arrayFn();
+        $(this).parent().append(matchDropdown);
+        $("#matches").offset({
+            "top": $(input).offset().top + $(input).outerHeight(),
+            "left": $(input).offset().left,
+        })
+        $("#matches").css({
+            "width": $(input).outerWidth(),
+        });
+        match($(this));
+    });
+
+    // $(input).on("blur", function () {
+    //     $("#matches").remove();
+    // });
+
+    $(input).on("input", function () {
+        match($(this));
+    });
+
+    function match(input){
+        let val = $(input).val();
+        let matches = array.filter((item) => {
+            return item.toLowerCase().startsWith(val.toLowerCase());
+        });
+        $("#matches").empty();
+        matches.forEach((item) => {
+            let option = $(`<button class="list-group-item 
+                list-group-item-action">${item}</button>`)
+                .appendTo("#matches");
+            option.on("click", function (e) {
+                e.preventDefault();
+                $(input).val($(this).text());
+                $("#matches").remove();
+                $(input).blur();
+            });
+        });
+    }
+}
+
+export function validateInputs(title, amount, to){
+    if (title === "") {
+        return false;
+    }
+    if (amount === "") {
+        return false;
+    }
+    if (to === "") {
+        return false;
+    }
+    return true;
 }

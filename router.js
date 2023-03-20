@@ -1,5 +1,6 @@
 import { loadMyView } from "/screens/mine.js";
 import { loadMainView, loadLoginView, loadSignupView } from "/screens/default.js";
+import { loadNav } from "/screens/sidenav.js";
 
 const app = $('#content');
 
@@ -11,6 +12,7 @@ window.router = new Navigo(root, useHash, hash);
 
 window.router.on({
     '/': () => {
+        loadNav();
         loadMyView();
     },
     '/another': () => {

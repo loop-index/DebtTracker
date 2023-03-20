@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-analytics.js";
-import { getFirestore, addDoc, updateDoc, doc, getDoc, setDoc, collection, arrayUnion, arrayRemove } from 'https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js';
+import * as FS from 'https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js';
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -32,9 +32,8 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
 // let FB = firebase;
-let FS = getFirestore(app);
+let db = FS.getFirestore(app);
 let AU = getAuth(app);
 // let STO = firebase.storage();
 
-export { config, FS, AU };
-export { doc, getDoc, setDoc, addDoc, updateDoc, collection, arrayRemove, arrayUnion }
+export { config, FS, AU, db};
