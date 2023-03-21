@@ -15,3 +15,9 @@
 #matches {
     position: absolute;
 }
+
+.entry:hover {
+    /* make it pop up */
+    transform: scale(1.05);
+    transition: 0.2s;
+}

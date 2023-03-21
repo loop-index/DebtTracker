@@ -95,10 +95,6 @@ export function autocomplete(input, arrayFn) {
         match($(this));
     });
 
-    // $(input).on("blur", function () {
-    //     $("#matches").remove();
-    // });
-
     $(input).on("input", function () {
         match($(this));
     });
@@ -110,12 +106,17 @@ export function autocomplete(input, arrayFn) {
         });
         $("#matches").empty();
         matches.forEach((item) => {
-            let option = $(`<button class="list-group-item 
-                list-group-item-action">${item}</button>`)
+            let option = $(`
+            <button class="list-group-item list-group-item-action">
+                <div class="row">
+                    <img class="col-auto rounded-circle" src="https://api.dicebear.com/5.x/big-smile/svg?size=32&backgroundColor=fbc324&seed=${item}">
+                    <span class="col overflow-hidden">${item}</span>
+                </div>
+            </button>`)
                 .appendTo("#matches");
             option.on("click", function (e) {
                 e.preventDefault();
-                $(input).val($(this).text());
+                $(input).val($(this).find("span").text());
                 $("#matches").remove();
                 $(input).blur();
             });

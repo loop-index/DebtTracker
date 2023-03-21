@@ -1,15 +1,20 @@
-import { myView, newCard } from "../styles/templates.js";
+import { myView } from "../styles/templates.js";
 import { checkToken, autocomplete, validateInputs } from "../utils.js"
 import { FS, db } from "../firebase.js";
+import { newCard, cardExtension, attachControls } from "../styles/components.js";
 
 const app = $("#content");
+let entries;
 let curUserRef = FS.doc(db, "users", localStorage.getItem("uid"));
+let outgoingList = [];
+let perPage = 7;
 
 export async function loadMyView(){
     checkToken();
     console.log('Now on first page');
     curUserRef = FS.doc(db, "users", localStorage.getItem("uid"));
     app.html(myView);
+    entries = $("#entries");
     loadEntries();
 
     $(".dropdown-menu").on("click.bs.dropdown", function(e){
@@ -52,11 +57,7 @@ async function attachInputAutocomplete(input){
     autocomplete($(input), getKnownUsers);
 }
 
-async function addNewEntry(title, amount, date, to, save=true){
-    app.append(newCard(title, date, amount));
-
-    if (!save) return;
-
+async function addNewEntry(title, amount, date, to){
     const docRef = await FS.addDoc(FS.collection(db, "transactions"), {
         from: localStorage.getItem("uid"),
         to: to,
@@ -65,13 +66,34 @@ async function addNewEntry(title, amount, date, to, save=true){
         date: date,
     });
     console.log("Document written with ID: ", docRef.id);
-    console.log(getRecipientId(to));
     
     await FS.updateDoc(curUserRef, {
         outgoingTransactions: FS.arrayUnion(docRef.id),
     });
 
     await toRecipient(await getRecipientId(to), docRef.id);
+
+    addNewCard(docRef.id, title, amount, date, to);
+}
+
+function addNewCard(id, title, amount, date, to, append=false){
+    let card;
+    if (!append){
+        card = $(newCard(id, title, date, amount, to)).prependTo($(entries));
+    } else {
+        card = $(newCard(id, title, date, amount, to)).appendTo($(entries));
+    }
+    $(card).on("click", function(){
+        if ($(this).hasClass("card-active")) return;
+
+        $(this).siblings().removeClass("card-active");
+        $(this).addClass("card-active");
+        $(this).siblings().find(".card-controls").remove();
+        $(this).siblings().find(".card-form").remove();
+        const controls = $(cardExtension()).appendTo($(this));
+        attachControls($(this), controls);
+    });
+    // $(entries).children().last().remove();
 }
 
 async function loadEntries(){
@@ -87,15 +109,31 @@ async function loadEntries(){
     // });
 
     const uDoc = await FS.getDoc(curUserRef);
-    const outgoingList = uDoc.data()['outgoingTransactions'];
+    outgoingList = uDoc.data()['outgoingTransactions'];
+    const page = outgoingList.slice(-perPage);
 
-    for (const docId of outgoingList){
+    for (const docId of page){
         let doc = await FS.getDoc(FS.doc(db, "transactions", docId));
-        addNewEntry(doc.data()['title'], doc.data()['amount'], 
-            doc.data()['date'], doc.data()['to'], false);
+        addNewCard(docId, doc.data()['title'], doc.data()['amount'],
+            doc.data()['date'], doc.data()['to']);
     }
     
     console.timeEnd("loading from firestore");
+
+    $(document).on("removeEntry", async function(e, id){
+        try {
+            let removed = outgoingList.indexOf(id);
+            outgoingList.splice(removed, 1);
+            let docId = outgoingList[outgoingList.length - 1 - perPage];
+            console.log(docId);
+            let doc = await FS.getDoc(FS.doc(db, "transactions", docId));
+            addNewCard(docId, doc.data()['title'], doc.data()['amount'],
+                doc.data()['date'], doc.data()['to'], true);
+        } catch (err) {
+            console.log(err);
+        }
+});
+
 }
 
 async function toRecipient(receiverId, docId){

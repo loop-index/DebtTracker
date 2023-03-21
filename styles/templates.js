@@ -1,8 +1,6 @@
-import { formatter } from '../utils.js'
-
 export const myView = `
-<div class="dropdown">
-    <span class="mb-3">
+<div class="dropdown m-2">
+    <span class="">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="newEntryBtn" data-bs-toggle="dropdown" aria-expanded="false">
             New Entry
         </button>
@@ -16,28 +14,11 @@ export const myView = `
             Sign Out
         </button>
     </span>
-    
+</div>
+<div class="container-fluid overflow-auto" id="entries">
 </div>
 `
 
-export function newCard(title, date, amount) {
-    return `
-    <div class="card entry">
-        <div class="card-body">
-            <div class="row">
-                <div class="col">
-                    <h5 class="entry-title">${title}</h5>
-                    <h1 class="entry-amount">${formatter.format(amount)}</h1>
-                    <p class="entry-date">Since ${date}</p>
-                </div>
-                <div class="col-auto d-flex align-items-center">
-                    <img src="https://via.placeholder.com/100" class="rounded-circle entry-person" alt="...">
-                </div>
-            </div>
-        </div>
-    </div> 
-    `
-} 
 
 export const mainView = `
     <div class="dropdown">
