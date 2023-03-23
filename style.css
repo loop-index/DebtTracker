@@ -1,6 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Helvetica+Rounded&display=swap');
+
 :root {
     --yellow: #fbc324;
     --white: #faf0e6;
+}
+
+body {
+    font-family: 'Helvetica Rounded', Helvetica, Arial, sans-serif;
 }
 
 #app {
@@ -18,6 +24,6 @@
 
 .entry:hover {
     /* make it pop up */
-    transform: scale(1.05);
+    transform: scale(1.01);
     transition: 0.2s;
 }

@@ -1,5 +1,5 @@
 import { loginView, mainView, signupView } from "../styles/templates.js";
-import { checkToken, login, signup } from "../utils.js"
+import { checkToken, login, signup } from "../screens/auth.js"
 
 const app = $("#content");
 

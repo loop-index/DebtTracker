@@ -8,7 +8,7 @@ export const matchDropdown = `
 
 export function newCard(id, title, date, amount, to) {
     return `
-    <div class="card entry" id="${id}">
+    <div class="card entry" id="${id}" style="display:none;">
         <div class="card-body">
             <div class="row">
                 <div class="col-auto d-flex align-items-center">

@@ -1,6 +1,6 @@
 export const myView = `
-<div class="dropdown m-2">
-    <span class="">
+<div class="d-flex justify-content-between">
+    <div class="dropdown my-2 px-2">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="newEntryBtn" data-bs-toggle="dropdown" aria-expanded="false">
             New Entry
         </button>
@@ -10,10 +10,12 @@ export const myView = `
             <input type="text" class="form-control mb-2" id="recipientInput" placeholder="Recipient" autocomplete="off">
             <button type="submit" id="newEntrySubmit" class="btn btn-primary">Create entry</button>
         </form>
+    </div>
+    <div class="my-2">
         <button class="btn btn-secondary" type="button" id="signOut">
-            Sign Out
+            Sign Out 
         </button>
-    </span>
+    </div>
 </div>
 <div class="container-fluid overflow-auto" id="entries">
 </div>

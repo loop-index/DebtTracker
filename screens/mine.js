@@ -1,49 +1,64 @@
 import { myView } from "../styles/templates.js";
-import { checkToken, autocomplete, validateInputs } from "../utils.js"
-import { FS, db } from "../firebase.js";
+import { checkToken, onAuthStateChanged, signOut } from "../screens/auth.js"
+import { autocomplete, validateInputs } from "../utils.js";
+import { AU, FS, db } from "../firebase.js";
 import { newCard, cardExtension, attachControls } from "../styles/components.js";
 
 const app = $("#content");
 let entries;
-let curUserRef = FS.doc(db, "users", localStorage.getItem("uid"));
+let uid;
+let curUserRef;
 let outgoingList = [];
 let perPage = 7;
 
 export async function loadMyView(){
-    checkToken();
-    console.log('Now on first page');
-    curUserRef = FS.doc(db, "users", localStorage.getItem("uid"));
-    app.html(myView);
-    entries = $("#entries");
-    loadEntries();
+    
+    await onAuthStateChanged(AU, async (user) => {
+        if (user) {
+            uid = user.uid;
+            
+            console.log('Now on first page');
+            curUserRef = FS.doc(db, "users", uid);
+            app.html(myView);
+            entries = $("#entries");
+            loadEntries();
 
-    $(".dropdown-menu").on("click.bs.dropdown", function(e){
-        e.stopPropagation();
-    });
+            $(".dropdown-menu").on("click.bs.dropdown", function(e){
+                e.stopPropagation();
+            });
 
-    $("#newEntryForm").submit(function(e){
-        e.preventDefault();
-        let title = $(this).children()[0].value;
-        let amount = $(this).children()[1].value;
-        let to = $(this).children()[2].value;
-        let date = new Date().toLocaleDateString();
-        if (validateInputs(title, amount, to)){
-            addNewEntry(title, amount, date, to);
+            $("#newEntryForm").submit(function(e){
+                e.preventDefault();
+                let title = $(this).children()[0].value;
+                let amount = $(this).children()[1].value;
+                let to = $(this).children()[2].value;
+                let date = new Date().toLocaleDateString();
+                if (validateInputs(title, amount, to)){
+                    addNewEntry(title, amount, date, to);
+                }
+                $(this).children()[0].value = "";
+                $(this).children()[1].value = "";
+                $(this).children()[2].value = "";
+
+                $(this).siblings(".dropdown-toggle").trigger('click.bs.dropdown');
+            });
+
+            await attachInputAutocomplete("#recipientInput");
+
+            $("#signOut").on("click", function(e){
+                e.preventDefault();
+                localStorage.removeItem("token");
+                localStorage.removeItem("uid");
+                signOut(AU).then(() => {
+                    console.log("Signed out");
+                    router.navigate("/login");
+                });
+            });
         }
-        $(this).children()[0].value = "";
-        $(this).children()[1].value = "";
-        $(this).children()[2].value = "";
-
-        $(this).siblings(".dropdown-toggle").trigger('click.bs.dropdown');
-    });
-
-    await attachInputAutocomplete("#recipientInput");
-
-    $("#signOut").on("click", function(e){
-        e.preventDefault();
-        localStorage.removeItem("token");
-        localStorage.removeItem("uid");
-        router.navigate("/login");
+        else {
+            router.navigate("/login");
+            return;
+        }
     });
 }
 
@@ -59,7 +74,7 @@ async function attachInputAutocomplete(input){
 
 async function addNewEntry(title, amount, date, to){
     const docRef = await FS.addDoc(FS.collection(db, "transactions"), {
-        from: localStorage.getItem("uid"),
+        from: uid,
         to: to,
         title: title,
         amount: amount,
@@ -74,7 +89,9 @@ async function addNewEntry(title, amount, date, to){
     await toRecipient(await getRecipientId(to), docRef.id);
 
     addNewCard(docRef.id, title, amount, date, to);
+    $(entries).children().last().remove();
 }
+
 
 function addNewCard(id, title, amount, date, to, append=false){
     let card;
@@ -91,10 +108,13 @@ function addNewCard(id, title, amount, date, to, append=false){
         $(this).siblings().find(".card-controls").remove();
         $(this).siblings().find(".card-form").remove();
         const controls = $(cardExtension()).appendTo($(this));
+        // controls.slideDown("fast");
         attachControls($(this), controls);
     });
-    // $(entries).children().last().remove();
+
+    card.fadeIn();
 }
+
 
 async function loadEntries(){
     console.time("loading from firestore");
@@ -111,14 +131,19 @@ async function loadEntries(){
     const uDoc = await FS.getDoc(curUserRef);
     outgoingList = uDoc.data()['outgoingTransactions'];
     const page = outgoingList.slice(-perPage);
+    const entries = [];
 
     for (const docId of page){
         let doc = await FS.getDoc(FS.doc(db, "transactions", docId));
-        addNewCard(docId, doc.data()['title'], doc.data()['amount'],
-            doc.data()['date'], doc.data()['to']);
+        entries.push(doc);
     }
     
     console.timeEnd("loading from firestore");
+
+    for (const doc of entries){
+        addNewCard(doc.id, doc.data()['title'], doc.data()['amount'],
+            doc.data()['date'], doc.data()['to']);
+    }
 
     $(document).on("removeEntry", async function(e, id){
         try {
