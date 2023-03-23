@@ -2,7 +2,7 @@ import { myView } from "../styles/templates.js";
 import { checkToken, onAuthStateChanged, signOut } from "../screens/auth.js"
 import { autocomplete, validateInputs } from "../utils.js";
 import { AU, FS, db } from "../firebase.js";
-import { newCard, cardExtension, attachControls } from "../styles/components.js";
+import { newCard, cardExtension, infoCard, attachControls } from "../styles/components.js";
 
 const app = $("#content");
 let entries;
@@ -93,7 +93,7 @@ async function addNewEntry(title, amount, date, to){
 }
 
 
-function addNewCard(id, title, amount, date, to, append=false){
+async function addNewCard(id, title, amount, date, to, append=false){
     let card;
     if (!append){
         card = $(newCard(id, title, date, amount, to)).prependTo($(entries));
@@ -111,8 +111,47 @@ function addNewCard(id, title, amount, date, to, append=false){
         // controls.slideDown("fast");
         attachControls($(this), controls);
     });
-
     card.fadeIn();
+    // let info;
+    // const img = $(card).find("img");
+    // const receiverId = await getRecipientId(to);
+    //
+    // if (receiverId == null){
+    //     card.fadeIn();
+    //     return;
+    // } 
+    // else {
+
+    //     const receiverRef = await FS.doc(db, "users", receiverId);
+    //     const receiverDoc = await FS.getDoc(receiverRef);
+    //     const receiverName = await receiverDoc.data()['name'];
+
+    //     $(img).on("mouseenter", async function(e){
+    //         e.preventDefault();
+
+    //         info = $(infoCard(receiverName, to)).appendTo($(card).parent());
+    //         $(info).css({
+    //             "top": e.clientY,
+    //             "left": e.clientX,
+    //         })
+    //         info.fadeIn();
+    //     });
+    //     $(img).on("mouseleave", function(e){
+    //         e.preventDefault();
+    //         info.fadeOut();
+    //         info.remove();
+    //     });
+    //     $(img).on("mousemove", function(e){
+    //         e.preventDefault();
+    //         $(info).css({
+    //             "top": e.clientY,
+    //             "left": e.clientX,
+    //         })
+    //     });
+
+    //     card.fadeIn();
+
+    // }
 }
 
 
@@ -150,7 +189,6 @@ async function loadEntries(){
             let removed = outgoingList.indexOf(id);
             outgoingList.splice(removed, 1);
             let docId = outgoingList[outgoingList.length - 1 - perPage];
-            console.log(docId);
             let doc = await FS.getDoc(FS.doc(db, "transactions", docId));
             addNewCard(docId, doc.data()['title'], doc.data()['amount'],
                 doc.data()['date'], doc.data()['to'], true);
@@ -169,7 +207,9 @@ async function toRecipient(receiverId, docId){
     });
 }
 
-async function getRecipientId(recipientMail){
+export async function getRecipientId(recipientMail){
+    if (recipientMail == "") return "";
+
     const uDoc = await FS.getDoc(curUserRef);
     let knownUsers = uDoc.data()['knownUsers'];
 

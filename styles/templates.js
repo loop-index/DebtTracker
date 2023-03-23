@@ -1,6 +1,6 @@
 export const myView = `
 <div class="d-flex justify-content-between">
-    <div class="dropdown my-2 px-2">
+    <div class="dropdown my-2 px-2 w-50">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="newEntryBtn" data-bs-toggle="dropdown" aria-expanded="false">
             New Entry
         </button>

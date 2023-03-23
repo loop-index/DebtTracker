@@ -1,4 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Helvetica+Rounded&display=swap');
+@font-face {
+    font-family: Helvetica Rounded;
+    src: urL(images/HelveticaRoundedLTStd-Bd.otf);
+}
 
 :root {
     --yellow: #fbc324;
@@ -6,7 +9,7 @@
 }
 
 body {
-    font-family: 'Helvetica Rounded', Helvetica, Arial, sans-serif;
+    font-family: 'Helvetica Rounded', sans-serif;
 }
 
 #app {
@@ -19,6 +22,10 @@ body {
 }
 
 #matches {
+    position: absolute;
+}
+
+.info-card {
     position: absolute;
 }
 
