@@ -1,6 +1,6 @@
 import { myView } from "../styles/templates.js";
-import { checkToken, onAuthStateChanged, signOut } from "../screens/auth.js"
-import { autocomplete, validateInputs } from "../utils.js";
+import { getRecipientId, onAuthStateChanged, signOut } from "../screens/auth.js"
+import { autocomplete, validateInputs, validateNewUser } from "../utils.js";
 import { AU, FS, db } from "../firebase.js";
 import { newCard, cardExtension, infoCard, attachControls } from "../styles/components.js";
 
@@ -8,8 +8,11 @@ const app = $("#content");
 let entries;
 let uid;
 let curUserRef;
-let outgoingList = [];
 let perPage = 7;
+
+// User data
+let outgoingList = [];
+let knownUsers = {};
 
 export async function loadMyView(){
     
@@ -21,7 +24,6 @@ export async function loadMyView(){
             curUserRef = FS.doc(db, "users", uid);
             app.html(myView);
             entries = $("#entries");
-            loadEntries();
 
             $(".dropdown-menu").on("click.bs.dropdown", function(e){
                 e.stopPropagation();
@@ -31,19 +33,41 @@ export async function loadMyView(){
                 e.preventDefault();
                 let title = $(this).children()[0].value;
                 let amount = $(this).children()[1].value;
-                let to = $(this).children()[2].value;
+                let recipientName = $(this).children()[2].value;
                 let date = new Date().toLocaleDateString();
-                if (validateInputs(title, amount, to)){
-                    addNewEntry(title, amount, date, to);
-                }
-                $(this).children()[0].value = "";
-                $(this).children()[1].value = "";
-                $(this).children()[2].value = "";
+                let recipientEmail = $(this).children()[3].value;
+                let recipientImage = $(this).children()[4].value;
 
-                $(this).siblings(".dropdown-toggle").trigger('click.bs.dropdown');
+                if (validateInputs(title, amount, recipientName) &&
+                    validateNewUser(recipientName, recipientEmail, knownUsers)){
+                    
+                    addNewEntry(title, amount, date, recipientName, recipientEmail, recipientImage);
+
+                    $(this).children()[0].value = "";
+                    $(this).children()[1].value = "";
+                    $(this).children()[2].value = "";
+                    $(this).children()[3].value = "";
+                    $(this).children()[4].value = "";
+    
+                    $(this).siblings(".dropdown-toggle").trigger('click.bs.dropdown');
+                }
             });
 
-            await attachInputAutocomplete("#recipientInput");
+            $("#newEntryDropdown").on("hide.bs.dropdown", function(){
+                $("#matches").remove();
+            });
+
+            $("#newEntryForm").on("click", function(e){
+                // if not clicked on matches and not on input
+                if ($(e.target).closest("#matches").length == 0
+                    && $(e.target).closest("#recipientInput").length == 0){
+                    $("#matches").remove();
+                }
+            });
+
+            $("#newUser").on("click", function(e){
+                $("#newUserForm").toggleClass("d-none");
+            });
 
             $("#signOut").on("click", function(e){
                 e.preventDefault();
@@ -53,6 +77,28 @@ export async function loadMyView(){
                     console.log("Signed out");
                     router.navigate("/login");
                 });
+            });
+
+            await loadEntries();
+            await attachInputAutocomplete("#recipientInput");
+
+            // Async calls
+
+            $(document).on("removeEntry", async function(e, id){
+                try {
+                    let removed = outgoingList.indexOf(id);
+                    outgoingList.splice(removed, 1);
+                    console.log(removed);
+                    let docId = outgoingList[outgoingList.length - perPage];
+                    console.log(docId);
+                    if (docId){
+                        let doc = await FS.getDoc(FS.doc(db, "transactions", docId));
+                        addNewCard(docId, doc.data()['title'], doc.data()['amount'],
+                            doc.data()['date'], doc.data()['to'], true);
+                    }
+                } catch (err) {
+                    console.log(err);
+                }
             });
         }
         else {
@@ -72,7 +118,22 @@ async function attachInputAutocomplete(input){
     autocomplete($(input), getKnownUsers);
 }
 
-async function addNewEntry(title, amount, date, to){
+async function addNewUser(name, email, image){
+    let id = await getRecipientId(email);
+    // if 
+    // let entryRef = "knownUsers." + name;
+    // await FS.updateDoc(curUserRef, {
+    //     entryRef: {
+    //         id: id,
+    //         email: email,
+    //         image: image,
+    //     },
+    // });
+}
+
+async function addNewEntry(title, amount, date, name){
+    let receiverId = await getRecipientId(name);
+    
     const docRef = await FS.addDoc(FS.collection(db, "transactions"), {
         from: uid,
         to: to,
@@ -80,16 +141,22 @@ async function addNewEntry(title, amount, date, to){
         amount: amount,
         date: date,
     });
+    
+    addNewCard(docRef.id, title, amount, date, name);
+    outgoingList.push(docRef.id);
+
+    // If there are more than 7 entries, remove the last one
+    if ($(entries).children().length > perPage){
+        $(entries).children().last().remove();
+    }
+
     console.log("Document written with ID: ", docRef.id);
     
     await FS.updateDoc(curUserRef, {
         outgoingTransactions: FS.arrayUnion(docRef.id),
     });
 
-    await toRecipient(await getRecipientId(to), docRef.id);
-
-    addNewCard(docRef.id, title, amount, date, to);
-    $(entries).children().last().remove();
+    await toRecipient(receiverId, docRef.id);
 }
 
 
@@ -169,6 +236,8 @@ async function loadEntries(){
 
     const uDoc = await FS.getDoc(curUserRef);
     outgoingList = uDoc.data()['outgoingTransactions'];
+    knownUsers = uDoc.data()['knownUsers'];
+
     const page = outgoingList.slice(-perPage);
     const entries = [];
 
@@ -183,20 +252,6 @@ async function loadEntries(){
         addNewCard(doc.id, doc.data()['title'], doc.data()['amount'],
             doc.data()['date'], doc.data()['to']);
     }
-
-    $(document).on("removeEntry", async function(e, id){
-        try {
-            let removed = outgoingList.indexOf(id);
-            outgoingList.splice(removed, 1);
-            let docId = outgoingList[outgoingList.length - 1 - perPage];
-            let doc = await FS.getDoc(FS.doc(db, "transactions", docId));
-            addNewCard(docId, doc.data()['title'], doc.data()['amount'],
-                doc.data()['date'], doc.data()['to'], true);
-        } catch (err) {
-            console.log(err);
-        }
-});
-
 }
 
 async function toRecipient(receiverId, docId){
@@ -207,36 +262,3 @@ async function toRecipient(receiverId, docId){
     });
 }
 
-export async function getRecipientId(recipientMail){
-    if (recipientMail == "") return "";
-
-    const uDoc = await FS.getDoc(curUserRef);
-    let knownUsers = uDoc.data()['knownUsers'];
-
-    if (knownUsers){
-        if (knownUsers[recipientMail]){
-            return knownUsers[recipientMail];
-        }
-    } else {
-        knownUsers = {};
-    }
-
-    const q = FS.query(FS.collection(db, "users"), 
-        FS.where("email", "==", recipientMail));
-    const querySnapshot = await FS.getDocs(q);
-    if (querySnapshot.empty){
-        knownUsers[recipientMail] = "";
-        await FS.updateDoc(curUserRef, {
-            knownUsers: knownUsers,
-        });
-        return null;
-    }
-    for (const doc of querySnapshot.docs){
-        knownUsers[recipientMail] = doc.id;
-        await FS.updateDoc(curUserRef, {
-            knownUsers: knownUsers,
-        });
-
-        return doc.id;
-    }
-}

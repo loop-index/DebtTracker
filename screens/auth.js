@@ -85,3 +85,21 @@ function saveCache(userCredential) {
 }
 
 export { onAuthStateChanged, signOut }
+
+export async function getRecipientId(recipientMail, knownUsers){
+    if (recipientMail == "") return null;
+
+    if (knownUsers[recipientMail]){
+        return knownUsers[recipientMail];
+    }
+
+    const q = FS.query(FS.collection(db, "users"), 
+        FS.where("email", "==", recipientMail));
+    const querySnapshot = await FS.getDocs(q);
+    if (querySnapshot.empty){
+        return null;
+    }
+    for (const doc of querySnapshot.docs){
+        return doc.id;
+    }
+}

@@ -1,13 +1,20 @@
 export const myView = `
 <div class="d-flex justify-content-between">
-    <div class="dropdown my-2 px-2 w-50">
+    <div class="dropdown my-2 px-2 w-50" id="newEntryDropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="newEntryBtn" data-bs-toggle="dropdown" aria-expanded="false">
             New Entry
         </button>
         <form class="dropdown-menu p-4" id="newEntryForm">
             <input type="text" class="form-control mb-2" placeholder="Title">
             <input type="text" class="form-control mb-2" placeholder="Amount">
-            <input type="text" class="form-control mb-2" id="recipientInput" placeholder="Recipient" autocomplete="off">
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" id="recipientInput" placeholder="Recipient" autocomplete="off">
+                <button class="btn btn-outline-secondary" type="button" id="newUser"> New? </button>
+            </div>
+            <div class="d-none" id="newUserForm">
+                <input type="text" class="form-control mb-2" placeholder="Recipient email">
+                <input type="text" class="form-control mb-2" placeholder="Optional avatar link">
+            </div>
             <button type="submit" id="newEntrySubmit" class="btn btn-primary">Create entry</button>
         </form>
     </div>

@@ -26,6 +26,9 @@ window.router.on({
     },
     '/signup': () => {
         loadSignupView();
+    },
+    '/index.html': () => {
+        router.navigate('/');
     }
 }).resolve();
 

@@ -14,7 +14,7 @@ export function autocomplete(input, arrayFn) {
     let array;
     $(input).on("focus", async function () {
         array = await arrayFn();
-        $(this).parent().append(matchDropdown);
+        $(this).parent().parent().append(matchDropdown);
         $("#matches").offset({
             "top": $(input).offset().top + $(input).outerHeight(),
             "left": $(input).offset().left,
@@ -35,6 +35,10 @@ export function autocomplete(input, arrayFn) {
             return item.toLowerCase().startsWith(val.toLowerCase());
         });
         $("#matches").empty();
+        if (matches.length == 0){
+            $("#matches").remove();
+            return;
+        }
         matches.forEach((item) => {
             let option = $(`
             <button class="list-group-item list-group-item-action">
@@ -46,6 +50,7 @@ export function autocomplete(input, arrayFn) {
                 .appendTo("#matches");
             option.on("click", function (e) {
                 e.preventDefault();
+                e.stopPropagation();
                 $(input).val($(this).find("span").text());
                 $("#matches").remove();
                 $(input).blur();
@@ -66,3 +71,14 @@ export function validateInputs(title, amount, to){
     }
     return true;
 }
+
+export function validateNewUser(name, email, knownUsers){
+    if (knownUsers['name']){
+        if (knownUsers['name']['email'] != "" 
+            && knownUsers['name']['email'] != email){
+            return false;
+        }
+    }
+    return true;
+}
+

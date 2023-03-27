@@ -1,6 +1,6 @@
 import { formatter } from '../utils.js'
 import { FS, db, AU } from '../firebase.js'
-import { getRecipientId } from '../screens/mine.js';
+import { getRecipientId } from '../screens/auth.js';
 
 export const matchDropdown = `
     <div class="list-group" id="matches">
@@ -184,12 +184,12 @@ export function attachControls(card, controls){
                     incomingTransactions: FS.arrayRemove(entryId),
                 });
             }
+            $(card).remove();
 
             console.log("Deleting entry" + entryId);
-            await FS.deleteDoc(entryRef);
-
             $(document).trigger("removeEntry", [entryId]);
-            $(card).remove();
+            
+            await FS.deleteDoc(entryRef);
         });
     });
 }
