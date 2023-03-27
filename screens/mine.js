@@ -1,6 +1,6 @@
 import { myView } from "../styles/templates.js";
-import { getRecipientId, onAuthStateChanged, signOut } from "../screens/auth.js"
-import { autocomplete, validateInputs, validateNewUser } from "../utils.js";
+import { getRecipientIdByName, onAuthStateChanged, signOut } from "../screens/auth.js"
+import { autocomplete, validateInputs } from "../utils.js";
 import { AU, FS, db } from "../firebase.js";
 import { newCard, cardExtension, infoCard, attachControls } from "../styles/components.js";
 
@@ -29,27 +29,30 @@ export async function loadMyView(){
                 e.stopPropagation();
             });
 
-            $("#newEntryForm").submit(function(e){
+            $("#newEntryForm").submit(async function(e){
                 e.preventDefault();
                 let title = $(this).children()[0].value;
                 let amount = $(this).children()[1].value;
-                let recipientName = $(this).children()[2].value;
+                let recipientName = $("#recipientName").val();
                 let date = new Date().toLocaleDateString();
-                let recipientEmail = $(this).children()[3].value;
-                let recipientImage = $(this).children()[4].value;
-
-                if (validateInputs(title, amount, recipientName) &&
-                    validateNewUser(recipientName, recipientEmail, knownUsers)){
-                    
-                    addNewEntry(title, amount, date, recipientName, recipientEmail, recipientImage);
-
-                    $(this).children()[0].value = "";
-                    $(this).children()[1].value = "";
-                    $(this).children()[2].value = "";
-                    $(this).children()[3].value = "";
-                    $(this).children()[4].value = "";
+                let recipientEmail = $("#recipientEmail").val();
+                let recipientImage = $("#recipientImage").val();
+                
+                if (validateInputs(title, amount, recipientName)){
+                    let recipientId = await validateUser(recipientName, recipientEmail, recipientImage);
+                    console.log(recipientId);
+                    if (recipientId) {
+                        
+                        addNewEntry(title, amount, date, recipientId);
     
-                    $(this).siblings(".dropdown-toggle").trigger('click.bs.dropdown');
+                        $(this).children()[0].value = "";
+                        $(this).children()[1].value = "";
+                        $("#recipientName").val("");
+                        $("#recipientEmail").val("");
+                        $("#recipientImage").val("");
+        
+                        $(this).siblings(".dropdown-toggle").trigger('click.bs.dropdown');
+                    }
                 }
             });
 
@@ -60,7 +63,7 @@ export async function loadMyView(){
             $("#newEntryForm").on("click", function(e){
                 // if not clicked on matches and not on input
                 if ($(e.target).closest("#matches").length == 0
-                    && $(e.target).closest("#recipientInput").length == 0){
+                    && $(e.target).closest("#recipientName").length == 0){
                     $("#matches").remove();
                 }
             });
@@ -80,7 +83,7 @@ export async function loadMyView(){
             });
 
             await loadEntries();
-            await attachInputAutocomplete("#recipientInput");
+            await attachInputAutocomplete("#recipientName");
 
             // Async calls
 
@@ -110,39 +113,73 @@ export async function loadMyView(){
 
 async function attachInputAutocomplete(input){
     async function getKnownUsers(){
-        const uDoc = await FS.getDoc(curUserRef);
-        const knownUsers = Object.keys(uDoc.data()['knownUsers']);
-        return knownUsers;
+        let users = [];
+        for (let id in knownUsers){
+            users.push(knownUsers[id].name);
+        }
+        return users;
     }
 
     autocomplete($(input), getKnownUsers);
 }
 
-async function addNewUser(name, email, image){
-    let id = await getRecipientId(email);
-    // if 
-    // let entryRef = "knownUsers." + name;
-    // await FS.updateDoc(curUserRef, {
-    //     entryRef: {
-    //         id: id,
-    //         email: email,
-    //         image: image,
-    //     },
-    // });
+async function validateUser(name, email, image){
+    // Check if name is empty
+    for (let id in knownUsers){
+        if (knownUsers[id].name === name){
+            return id;
+        }
+    }
+
+    // If name not found then it's a new recipient
+    if (email === ""){
+        var id = "#" + Date.now();
+    }
+    else {
+        console.log("Searching for user with email: " + email)
+        const q = FS.query(FS.collection(db, "users"), 
+            FS.where("email", "==", email));
+        const querySnapshot = await FS.getDocs(q);
+        if (querySnapshot.empty){
+            alert ("No user found with this email");
+            return null;
+        }
+        for (const doc of querySnapshot.docs){
+            var id = doc.id;
+            break;
+        }
+    }
+
+    image = image === "" ? `https://api.dicebear.com/5.x/big-smile/svg?size=48&backgroundColor=fbc324&seed=${id.slice(1)}` : image;
+
+    knownUsers[id] = {
+        name: name,
+        email: email,
+        image: image,
+    };
+    await FS.updateDoc(curUserRef, {
+        [`knownUsers.${id}`]: {
+            name: name,
+            email: email,
+            image: image,
+        },
+    });
+    return id;
 }
 
-async function addNewEntry(title, amount, date, name){
-    let receiverId = await getRecipientId(name);
-    
+async function addNewEntry(title, amount, date, id){
+    let history = [new Date().toLocaleString() + ": " + "Created."];
+
     const docRef = await FS.addDoc(FS.collection(db, "transactions"), {
         from: uid,
-        to: to,
+        to: id,
         title: title,
         amount: amount,
         date: date,
+        history: history
     });
     
-    addNewCard(docRef.id, title, amount, date, name);
+    addNewCard(docRef.id, title, amount, date, id);
     outgoingList.push(docRef.id);
 
     // If there are more than 7 entries, remove the last one
@@ -156,27 +193,31 @@ async function addNewEntry(title, amount, date, name){
         outgoingTransactions: FS.arrayUnion(docRef.id),
     });
 
-    await toRecipient(receiverId, docRef.id);
+    await toRecipient(id, docRef.id);
 }
 
 
 async function addNewCard(id, title, amount, date, to, append=false){
     let card;
+    let name = knownUsers[to].name;
+    let image = knownUsers[to].image;
+
     if (!append){
-        card = $(newCard(id, title, date, amount, to)).prependTo($(entries));
+        card = $(newCard(title, date, amount, name, image)).prependTo($(entries));
     } else {
-        card = $(newCard(id, title, date, amount, to)).appendTo($(entries));
+        card = $(newCard(title, date, amount, name, image)).appendTo($(entries));
     }
     $(card).on("click", function(){
         if ($(this).hasClass("card-active")) return;
-
-        $(this).siblings().removeClass("card-active");
+        
+        $(".card-active").find(".card-controls").remove();
+        $(".card-active").find(".card-form").remove();
+        $(".card-active").removeClass("card-active");
         $(this).addClass("card-active");
-        $(this).siblings().find(".card-controls").remove();
-        $(this).siblings().find(".card-form").remove();
+
         const controls = $(cardExtension()).appendTo($(this));
         // controls.slideDown("fast");
-        attachControls($(this), controls);
+        attachControls($(this), controls, id);
     });
     card.fadeIn();
     // let info;
@@ -255,7 +296,7 @@ async function loadEntries(){
 }
 
 async function toRecipient(receiverId, docId){
-    if (!receiverId) return;
+    if (!receiverId || receiverId[0] == "#") return;
     const rDoc = await FS.getDoc(FS.doc(db, "users", receiverId));
     await FS.updateDoc(rDoc.ref, {
         incomingTransactions: FS.arrayUnion(docId),

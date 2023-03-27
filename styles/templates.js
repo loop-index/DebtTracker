@@ -8,12 +8,17 @@ export const myView = `
             <input type="text" class="form-control mb-2" placeholder="Title">
             <input type="text" class="form-control mb-2" placeholder="Amount">
             <div class="input-group mb-2">
-                <input type="text" class="form-control" id="recipientInput" placeholder="Recipient" autocomplete="off">
-                <button class="btn btn-outline-secondary" type="button" id="newUser"> New? </button>
+                <input type="text" class="form-control" id="recipientName" placeholder="Recipient" autocomplete="off">
+                <button class="btn btn-outline-secondary" type="button" id="newUser"> More </button>
             </div>
             <div class="d-none" id="newUserForm">
-                <input type="text" class="form-control mb-2" placeholder="Recipient email">
-                <input type="text" class="form-control mb-2" placeholder="Optional avatar link">
+                <span class="input-group mb-2">
+                    <input type="text" id="recipientEmail" class="form-control" placeholder="Recipient email">
+                    <div class="input-group-text">
+                        <i class="fa-regular fa-circle-question" data-bs-toggle="tooltip" data-bs-placement="right" title="If your receiver is an existing user, enter their email here."></i>
+                    </div>
+                </span>
+                <input type="text" id="recipientImage" class="form-control mb-2" placeholder="Optional avatar URL">
             </div>
             <button type="submit" id="newEntrySubmit" class="btn btn-primary">Create entry</button>
         </form>

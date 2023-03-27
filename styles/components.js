@@ -1,6 +1,5 @@
 import { formatter } from '../utils.js'
 import { FS, db, AU } from '../firebase.js'
-import { getRecipientId } from '../screens/auth.js';
 
 export const matchDropdown = `
     <div class="list-group" id="matches">
@@ -8,13 +7,13 @@ export const matchDropdown = `
 `;
 
 
-export function newCard(id, title, date, amount, to, name) {
+export function newCard(title, date, amount, to, image) {
     return `
-    <div class="card entry" id="${id}" style="display:none;">
+    <div class="card entry" style="display:none;">
         <div class="card-body">
             <div class="row">
                 <div class="col-auto d-flex align-items-center">
-                    <img class="img-resonsive rounded-circle" src="https://api.dicebear.com/5.x/big-smile/svg?size=48&backgroundColor=fbc324&seed=${to}">
+                    <img class="rounded-circle" src=${image} style="max-width: 48px; width: 100%;">
                 </div>
                 <div class="col-auto">
                     <h5 class="entry-title">${title}</h5>
@@ -25,7 +24,6 @@ export function newCard(id, title, date, amount, to, name) {
                 </div>
             </div>
             <p class="text-end m-0 text-muted"><small>${to}</small></p>
-            <p class="d-none entry-to"><small>${to}</small></p>
         </div>
     </div> 
     `
@@ -82,8 +80,25 @@ export function cardExtension(){
     `
 }
 
-export function attachControls(card, controls){
+export function attachControls(card, controls, id){
     const buttons = $(controls).children();
+
+    // History
+    $(buttons[0]).on("click", async function (e) {
+        e.preventDefault();
+        $(card).find(".card-form").remove();
+        let changes = "";
+        await FS.getDoc(FS.doc(db, "transactions", id)).then((doc) => {
+            if (doc.exists) {
+                const changeList = doc.data().history;
+                for (let i = 0; i < changeList.length; i++) {
+                    changes += `<small>${changeList[i]}</small><br>`
+                }
+                changes = `<div class="card-form mb-2 text-start fw-light">${changes}</div>`;
+                $(controls).prepend($(changes));
+            }
+        });
+    });
 
     // Pay
     $(buttons[1]).on("click", function (e) {
@@ -107,9 +122,10 @@ export function attachControls(card, controls){
             $(card).find(".entry-amount").text(formatter.format(amount - $(form).find("input").val()));
 
             // Updating the database
-            const entryRef = await FS.doc(db, "transactions", $(card).attr("id"));
+            const entryRef = await FS.doc(db, "transactions", id);
             await FS.updateDoc(entryRef, {
                 amount: amount - amountPaid,
+                history: FS.arrayUnion(`${new Date().toLocaleString()}: Paid ${formatter.format(amountPaid)}, ${formatter.format(amount-amountPaid)} remained.`)
             });
             $(form).remove();
         });
@@ -137,17 +153,30 @@ export function attachControls(card, controls){
             let title = $(form).find("input")[0].value;
             let amount = $(form).find("input")[1].value;
 
+            if (title === "" && amount === "") {
+                return;
+            }
+
+            let changes = "Changed ";
+
             if (title !== "") {
+                changes += "title from " + $(card).find(".entry-title").text() + " to " + title;
                 $(card).find(".entry-title").text(title);
             }
             if (amount !== "") {
+                //add comma if title was changed
+                if (title !== "") {
+                    changes += ", ";
+                }
+                changes += "amount from " + formatter.format($(card).find(".entry-amount").text().replace("$", "")) + " to " + formatter.format(amount);
                 $(card).find(".entry-amount").text(formatter.format(amount));
             }
 
-            const entryRef = await FS.doc(db, "transactions", $(card).attr("id"));
+            const entryRef = await FS.doc(db, "transactions", id);
             await FS.updateDoc(entryRef, {
                 title: $(card).find(".entry-title").text(),
                 amount: $(card).find(".entry-amount").text().replace("$", ""),
+                history: FS.arrayUnion(`${new Date().toLocaleString()}: ${changes}.`)
             });
 
             $(form).remove();
@@ -167,27 +196,28 @@ export function attachControls(card, controls){
 
         $(form).on("click", async function (e) {
             e.preventDefault();
-            const entryId = $(card).attr("id");
-            const entryRef = await FS.doc(db, "transactions", entryId);
+            const entryRef = await FS.doc(db, "transactions", id);
             const userId = await AU.currentUser.uid;
             const userRef = await FS.doc(db, "users", userId);
 
             // Removing the entry from the user's list
             await FS.updateDoc(userRef, {
-                outgoingTransactions: FS.arrayRemove(entryId),
+                outgoingTransactions: FS.arrayRemove(id),
             });
 
-            const receiverId = await getRecipientId($(card).find(".entry-to").text());
-            if (receiverId !== null && receiverId !== "") {
+            const receiverId = await FS.getDoc(entryRef).then((doc) => {
+                return doc.data()['to'];
+            });
+            if (receiverId[0] != '#') {
                 const receiverRef = await FS.doc(db, "users", receiverId);
                 await FS.updateDoc(receiverRef, {
-                    incomingTransactions: FS.arrayRemove(entryId),
+                    incomingTransactions: FS.arrayRemove(id),
                 });
             }
             $(card).remove();
 
-            console.log("Deleting entry" + entryId);
-            $(document).trigger("removeEntry", [entryId]);
+            console.log("Deleting entry " + id);
+            $(document).trigger("removeEntry", [id]);
             
             await FS.deleteDoc(entryRef);
         });

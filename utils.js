@@ -43,7 +43,6 @@ export function autocomplete(input, arrayFn) {
             let option = $(`
             <button class="list-group-item list-group-item-action">
                 <div class="row">
-                    <img class="col-auto rounded-circle" src="https://api.dicebear.com/5.x/big-smile/svg?size=32&backgroundColor=fbc324&seed=${item}">
                     <span class="col overflow-hidden">${item}</span>
                 </div>
             </button>`)
@@ -72,13 +71,4 @@ export function validateInputs(title, amount, to){
     return true;
 }
 
-export function validateNewUser(name, email, knownUsers){
-    if (knownUsers['name']){
-        if (knownUsers['name']['email'] != "" 
-            && knownUsers['name']['email'] != email){
-            return false;
-        }
-    }
-    return true;
-}
 
