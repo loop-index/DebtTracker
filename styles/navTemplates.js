@@ -8,13 +8,13 @@ export const navView =
   <hr>
   <ul class="nav nav-pills justify-content-center">
     <li>
-      <a href="#" class="nav-link fw-bold text-dark">
+      <a href="outgoing" class="nav-link fw-bold text-dark">
         <i class="fa-solid fa-arrow-trend-down"></i>
         <span class="d-none d-sm-none d-md-inline ms-1">outgoing</span>
       </a>
     </li>
     <li>
-      <a href="another" class="nav-link fw-bold text-dark">
+      <a href="incoming" class="nav-link fw-bold text-dark">
         <i class="fa-solid fa-arrow-trend-up"></i>
         <span class="d-none d-sm-none d-md-inline ms-1">incoming</span>
       </a>

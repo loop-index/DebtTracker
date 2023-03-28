@@ -1,37 +1,82 @@
-export const myView = `
-<div class="d-flex justify-content-between">
-    <div class="dropdown my-2 px-2 w-50" id="newEntryDropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="newEntryBtn" data-bs-toggle="dropdown" aria-expanded="false">
-            New Entry
-        </button>
-        <form class="dropdown-menu p-4" id="newEntryForm">
-            <input type="text" class="form-control mb-2" placeholder="Title">
-            <input type="text" class="form-control mb-2" placeholder="Amount">
-            <div class="input-group mb-2">
-                <input type="text" class="form-control" id="recipientName" placeholder="Recipient" autocomplete="off">
-                <button class="btn btn-outline-secondary" type="button" id="newUser"> More </button>
-            </div>
-            <div class="d-none" id="newUserForm">
-                <span class="input-group mb-2">
-                    <input type="text" id="recipientEmail" class="form-control" placeholder="Recipient email">
-                    <div class="input-group-text">
-                        <i class="fa-regular fa-circle-question" data-bs-toggle="tooltip" data-bs-placement="right" title="If your receiver is an existing user, enter their email here."></i>
-                    </div>
-                </span>
-                <input type="text" id="recipientImage" class="form-control mb-2" placeholder="Optional avatar URL">
-            </div>
-            <button type="submit" id="newEntrySubmit" class="btn btn-primary">Create entry</button>
-        </form>
+export function outView (name, image) {
+    return `
+    <div class="d-flex justify-content-between">
+        <div class="dropdown my-2 px-2 w-50" id="newEntryDropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="newEntryBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                New Entry
+            </button>
+            <form class="dropdown-menu p-4" id="newEntryForm">
+                <input type="text" class="form-control mb-2" placeholder="Title">
+                <input type="text" class="form-control mb-2" placeholder="Amount">
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control" id="recipientName" placeholder="Recipient" autocomplete="off">
+                    <button class="btn btn-outline-secondary" type="button" id="newUser"> More </button>
+                </div>
+                <div class="d-none" id="newUserForm">
+                    <span class="input-group mb-2">
+                        <input type="text" id="recipientEmail" class="form-control" placeholder="Recipient email">
+                        <div class="input-group-text">
+                            <i class="fa-regular fa-circle-question" data-bs-toggle="tooltip" data-bs-placement="right" title="If your receiver is an existing user, enter their email here."></i>
+                        </div>
+                    </span>
+                    <input type="text" id="recipientImage" class="form-control mb-2" placeholder="Optional avatar URL">
+                </div>
+                <button type="submit" id="newEntrySubmit" class="btn btn-primary">Create entry</button>
+            </form>
+        </div>
+        <div class="my-2">
+            <p class="text-secondary">${name}</p>
+        </div>
+        <div class="my-2">
+            <button class="btn btn-secondary" type="button" id="signOut">
+                Sign Out 
+            </button>
+        </div>
     </div>
-    <div class="my-2">
-        <button class="btn btn-secondary" type="button" id="signOut">
-            Sign Out 
-        </button>
+    <div class="container-fluid overflow-auto" id="entries">
     </div>
-</div>
-<div class="container-fluid overflow-auto" id="entries">
-</div>
-`
+    `
+}
+
+export function inView (name, image) {
+    return `
+    <div class="d-flex justify-content-between">
+        <div class="dropdown my-2 px-2 w-50" id="newEntryDropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="newEntryBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                New Request
+            </button>
+            <form class="dropdown-menu p-4" id="newEntryForm">
+                <input type="text" class="form-control mb-2" placeholder="Title">
+                <input type="text" class="form-control mb-2" placeholder="Amount">
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control" id="recipientName" placeholder="Recipient" autocomplete="off">
+                    <button class="btn btn-outline-secondary" type="button" id="newUser"> More </button>
+                </div>
+                <div class="d-none" id="newUserForm">
+                    <span class="input-group mb-2">
+                        <input type="text" id="recipientEmail" class="form-control" placeholder="Recipient email">
+                        <div class="input-group-text">
+                            <i class="fa-regular fa-circle-question" data-bs-toggle="tooltip" data-bs-placement="right" title="If your receiver is an existing user, enter their email here."></i>
+                        </div>
+                    </span>
+                    <input type="text" id="recipientImage" class="form-control mb-2" placeholder="Optional avatar URL">
+                </div>
+                <button type="submit" id="newEntrySubmit" class="btn btn-primary">Create entry</button>
+            </form>
+        </div>
+        <div class="my-2">
+            <p class="text-secondary">${name}</p>
+        </div>
+        <div class="my-2">
+            <button class="btn btn-secondary" type="button" id="signOut">
+                Sign Out 
+            </button>
+        </div>
+    </div>
+    <div class="container-fluid overflow-auto" id="entries">
+    </div>
+    `
+}
 
 
 export const mainView = `

@@ -48,34 +48,86 @@ export function infoCard(name, email) {
     `
 }
 
-export function cardExtension(){
-    return `
+export function outCardExtension(self){
+    if (self) return `
     <div class="mb-3 me-3 ms-3 text-end card-controls">
-        <button class="btn btn-outline-primary">
+        <button class="btn btn-outline-primary" id="cardHistBtn">
             <span class="col overflow-hidden">
                 <i class="col-auto fa-solid fa-clock-rotate-left"></i>
             </span>
         </button>
-        <button class="btn btn-outline-success">
+        <button class="btn btn-outline-success" id="cardPayBtn">
             <span class="col overflow-hidden">
                 <i class="col-auto fa-solid fa-credit-card"></i>
                 Pay
             </span>
         </button>
-        <button class="btn btn-outline-warning">
+        <button class="btn btn-outline-warning" id="cardUpdateBtn">
             <span class="col overflow-hidden">
                 <i class="col-auto fa-solid fa-pen-to-square"></i>
                 Edit
             </span>
         </button>
         <div class="btn-group">
-            <button class="btn btn-outline-danger">
+            <button class="btn btn-outline-danger" id="cardDelBtn">
                 <span class="col overflow-hidden">
                     <i class="col-auto fa-solid fa-trash"></i>
                     Delete
                 </span>
             </button>
         </div>
+    </div>
+    `;
+
+    return `
+    <div class="mb-3 me-3 ms-3 text-end card-controls">
+        <button class="btn btn-outline-primary" id="cardHistBtn">
+            <span class="col overflow-hidden">
+                <i class="col-auto fa-solid fa-clock-rotate-left"></i>
+            </span>
+        </button>
+        <button class="btn btn-outline-success" id="cardPayBtn">
+            <span class="col overflow-hidden">
+                <i class="col-auto fa-solid fa-credit-card"></i>
+                Pay
+            </span>
+        </button>
+    </div>
+    `
+}
+
+export function inCardExtension(self){
+    if (self) return `
+    <div class="mb-3 me-3 ms-3 text-end card-controls">
+        <button class="btn btn-outline-primary" id="cardHistBtn">
+            <span class="col overflow-hidden">
+                <i class="col-auto fa-solid fa-clock-rotate-left"></i>
+            </span>
+        </button>
+        <button class="btn btn-outline-warning" id="cardUpdateBtn">
+            <span class="col overflow-hidden">
+                <i class="col-auto fa-solid fa-pen-to-square"></i>
+                Edit
+            </span>
+        </button>
+        <div class="btn-group">
+            <button class="btn btn-outline-danger" id="cardDelBtn">
+                <span class="col overflow-hidden">
+                    <i class="col-auto fa-solid fa-trash"></i>
+                    Delete
+                </span>
+            </button>
+        </div>
+    </div>
+    `;
+
+    return `
+    <div class="mb-3 me-3 ms-3 text-end card-controls">
+        <button class="btn btn-outline-primary" id="cardHistBtn">
+            <span class="col overflow-hidden">
+                <i class="col-auto fa-solid fa-clock-rotate-left"></i>
+            </span>
+        </button>
     </div>
     `
 }
@@ -84,7 +136,7 @@ export function attachControls(card, controls, id){
     const buttons = $(controls).children();
 
     // History
-    $(buttons[0]).on("click", async function (e) {
+    $("#cardHistBtn").on("click", async function (e) {
         e.preventDefault();
         $(card).find(".card-form").remove();
         let changes = "";
@@ -101,7 +153,7 @@ export function attachControls(card, controls, id){
     });
 
     // Pay
-    $(buttons[1]).on("click", function (e) {
+    $("#cardPayBtn").on("click", function (e) {
         e.preventDefault();
         $(card).find(".card-form").remove();
         const form = $(`
@@ -136,7 +188,7 @@ export function attachControls(card, controls, id){
     });
 
     // Edit
-    $(buttons[2]).on("click", function (e) {
+    $("#cardUpdateBtn").on("click", function (e) {
         e.preventDefault();
         $(card).find(".card-form").remove();
         const form = $(`
@@ -184,7 +236,7 @@ export function attachControls(card, controls, id){
     });
 
     // Delete
-    $($(buttons[3]).children()[0]).on("click", function (e) {
+    $($("#cardDelBtn").children()[0]).on("click", function (e) {
         e.preventDefault();
         $(card).find(".card-form").remove();
         // Making sure the user wants to delete the card

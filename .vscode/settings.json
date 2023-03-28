@@ -1,3 +1,4 @@
 {
-    "liveServer.settings.multiRootWorkspaceName": "DebtTracker"
+    "liveServer.settings.multiRootWorkspaceName": "DebtTracker",
+    "liveServer.settings.file": "/index.html"
 }
