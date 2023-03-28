@@ -152,7 +152,7 @@ export class outgoingScreen extends listScreen {
     
     async addNewCard(id, title, amount, date, to, self, append=false){
         let card;
-        let name = "to" + this.knownUsers[to].name;
+        let name = "to " + this.knownUsers[to].name;
         let image = this.knownUsers[to].image;
     
         if (!append){
