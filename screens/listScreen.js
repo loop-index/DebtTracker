@@ -27,6 +27,7 @@ export class listScreen {
     }
 
     async render() {
+        this.app.detachCurrentListener();
         $('#content').html(this.template(this.username, this.userimage));
         this.attachHandlers();
 

@@ -132,7 +132,7 @@ export function inCardExtension(self){
     `
 }
 
-export function attachControls(card, controls, id){
+export function attachControls(card, controls, id, incoming){
     const buttons = $(controls).children();
 
     // History
@@ -251,27 +251,44 @@ export function attachControls(card, controls, id){
             const entryRef = await FS.doc(db, "transactions", id);
             const userId = await AU.currentUser.uid;
             const userRef = await FS.doc(db, "users", userId);
-
-            // Removing the entry from the user's list
-            await FS.updateDoc(userRef, {
-                outgoingTransactions: FS.arrayRemove(id),
-            });
-
+            
             const receiverId = await FS.getDoc(entryRef).then((doc) => {
+                if (incoming) {
+                    return doc.data()['from'];
+                }
                 return doc.data()['to'];
             });
-            if (receiverId[0] != '#') {
-                const receiverRef = await FS.doc(db, "users", receiverId);
-                await FS.updateDoc(receiverRef, {
+
+            // Removing the entry from the user's list
+            if (incoming) {
+                await FS.updateDoc(userRef, {
                     incomingTransactions: FS.arrayRemove(id),
                 });
+                if (receiverId[0] != '#') {
+                    const receiverRef = await FS.doc(db, "users", receiverId);
+                    await FS.updateDoc(receiverRef, {
+                        outgoingTransactions: FS.arrayRemove(id),
+                    });
+                    console.log("Removing from " + receiverId)
+                }
+            } else {
+                await FS.updateDoc(userRef, {
+                    outgoingTransactions: FS.arrayRemove(id),
+                });
+                if (receiverId[0] != '#') {
+                    const receiverRef = await FS.doc(db, "users", receiverId);
+                    await FS.updateDoc(receiverRef, {
+                        incomingTransactions: FS.arrayRemove(id),
+                    });
+                    console.log("Removing from " + receiverId)
+                }
             }
-            $(card).remove();
 
             console.log("Deleting entry " + id);
-            $(document).trigger("removeEntry", [id]);
+            // $(document).trigger("removeEntry", [id]);
             
             await FS.deleteDoc(entryRef);
+            $(card).remove();
         });
     });
 }

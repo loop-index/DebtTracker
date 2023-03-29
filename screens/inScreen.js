@@ -16,7 +16,8 @@ export class incomingScreen extends listScreen {
         this.loadEntries();
 
         const q = FS.doc(db, "users", this.uid);
-        FS.onSnapshot(q, async (snapshot) => {
+        const detachFn = FS.onSnapshot(q, async (snapshot) => {
+            console.log("Changed");
             const incoming = snapshot.get('incomingTransactions');
 
             // Only load new entries
@@ -39,6 +40,8 @@ export class incomingScreen extends listScreen {
             }
                     
         });
+
+        this.app.setDetachFunction(detachFn);
     }
 
     attachHandlers() {
@@ -178,7 +181,7 @@ export class incomingScreen extends listScreen {
     
             const controls = $(inCardExtension(self)).appendTo($(this));
             // controls.slideDown("fast");
-            attachControls($(this), controls, id);
+            attachControls($(this), controls, id, true);
         });
         card.fadeIn();
     

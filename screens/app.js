@@ -11,6 +11,7 @@ export class App {
         this.knownUsers = {};
         this.outgoingScreen;
         this.incomingScreen;
+        this.detachListenerFn = () => {};
     }
 
     async init(callback) {
@@ -110,4 +111,13 @@ export class App {
         }
         return this.incomingScreen;
     }
+
+    setDetachFunction(fn) {
+        this.detachListenerFn = fn;
+    }
+
+    detachCurrentListener() {
+        this.detachListenerFn();
+    }
+
 }
