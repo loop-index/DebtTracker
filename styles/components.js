@@ -7,7 +7,7 @@ export const matchDropdown = `
 `;
 
 
-export function newCard(title, date, amount, to, image) {
+export function newCard(data, name, image) {
     return `
     <div class="card entry" style="display:none;">
         <div class="card-body">
@@ -16,14 +16,17 @@ export function newCard(title, date, amount, to, image) {
                     <img class="rounded-circle" src=${image} style="max-width: 48px; width: 100%;">
                 </div>
                 <div class="col-auto">
-                    <h5 class="entry-title">${title}</h5>
-                    <p class="entry-date text-muted"><small>Since ${date}</small></p>
+                    <h5 class="entry-title">${data['title']}</h5>
+                    <p class="entry-date text-muted"><small>Since ${data['date']}</small></p>
                 </div>
                 <div class="col text-end">
-                    <h1 class="entry-amount">${formatter.format(amount)}</h1>
+                    <h1 class="entry-amount">${formatter.format(data['amount'])}</h1>
                 </div>
             </div>
-            <p class="text-end m-0 text-muted"><small>${to}</small></p>
+            <div class="d-flex align-items-center mt-2">
+                <span class="badge bg-primary">${data['status']}</span>
+                <p class="flex-grow-1 text-end m-0 text-muted"><small>${name}</small></p>
+            </div>
         </div>
     </div> 
     `

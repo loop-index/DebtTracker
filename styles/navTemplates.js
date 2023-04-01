@@ -1,6 +1,6 @@
 export const navView = 
 `
-<div class="d-flex flex-column flex-shrink-0">
+<div class="d-flex flex-column h-100">
   <a href="/" class="d-flex text-dark text-decoration-none mt-3">
     <img src="../images/logo.png" alt="logo" class="img-fluid d-none d-sm-block">
     <img src="../images/clock.png" alt="logo" class="img-fluid d-block d-sm-none">
@@ -20,5 +20,8 @@ export const navView =
       </a>
     </li>
   </ul>
+  <button class="btn btn-danger mt-auto mb-2" type="button" id="test">
+    Test function
+  </button>
 </div>
 `

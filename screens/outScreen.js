@@ -32,8 +32,7 @@ export class outgoingScreen extends listScreen {
             
                 for (const doc of entries){
                     let data = doc.data();
-                    this.addNewCard(doc.id, data['title'], data['amount'],
-                        data['date'], data['to'], false);
+                    this.addNewCard(doc.id, data, false);
                 }
 
                 this.list = incoming;
@@ -117,8 +116,7 @@ export class outgoingScreen extends listScreen {
                     let doc = await FS.getDoc(FS.doc(db, "transactions", docId));
                     let data = doc.data();
                     let isSelf = data['createdBy'] == self.uid;
-                    self.addNewCard(docId, data['title'], data['amount'],
-                        data['date'], data['to'], isSelf, true);
+                    self.addNewCard(docId, data, isSelf, true);
                 }
             } catch (err) {
                 console.log(err);
@@ -129,18 +127,21 @@ export class outgoingScreen extends listScreen {
     async addNewEntry(title, amount, date, id){
         let history = [new Date().toLocaleString() + ": " + "Created."];
         console.log(this.uid);
-    
-        const docRef = await FS.addDoc(FS.collection(db, "transactions"), {
+
+        let data = {
             from: this.uid,
             to: id,
             title: title,
             amount: amount,
             date: date,
             history: history,
-            createdBy: this.uid
-        });
+            createdBy: this.uid,
+            status: ""
+        }
+    
+        const docRef = await FS.addDoc(FS.collection(db, "transactions"), data);
         
-        this.addNewCard(docRef.id, title, amount, date, id, true);
+        this.addNewCard(docRef.id, data, true);
         this.list.push(docRef.id);
     
         console.log("Document written with ID: ", docRef.id);
@@ -153,15 +154,16 @@ export class outgoingScreen extends listScreen {
     }
     
     
-    async addNewCard(id, title, amount, date, to, self, append=false){
+    async addNewCard(id, data, self, append=false){
         let card;
+        let to = data['to'];
         let name = "to " + this.knownUsers[to].name;
         let image = this.knownUsers[to].image;
     
         if (!append){
-            card = $(newCard(title, date, amount, name, image)).prependTo($("#entries"));
+            card = $(newCard(data, name, image)).prependTo($("#entries"));
         } else {
-            card = $(newCard(title, date, amount, name, image)).appendTo($("#entries"));
+            card = $(newCard(data, name, image)).appendTo($("#entries"));
         }
         $(card).on("click", function(){
             if ($(this).hasClass("card-active")) return;
@@ -196,8 +198,7 @@ export class outgoingScreen extends listScreen {
         for (const doc of entries){
             let data = doc.data();
             let isSelf = data['createdBy'] == this.uid;
-            this.addNewCard(doc.id, data['title'], data['amount'],
-                data['date'], data['to'], isSelf);
+            this.addNewCard(doc.id, data, isSelf);
         }
     }
     

@@ -23,6 +23,7 @@ body {
 
 #matches {
     position: absolute;
+    z-index: 10;
 }
 
 .info-card {

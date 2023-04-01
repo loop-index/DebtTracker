@@ -65,6 +65,9 @@ export class App {
             if (this.knownUsers[id].name === name){
                 return id;
             }
+            else if (email != "" && this.knownUsers[id].email === email){
+                alert("User with this email already exists")
+            }
         }
     
         // If name not found then it's a new recipient
