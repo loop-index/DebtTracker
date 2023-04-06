@@ -13,7 +13,6 @@ export class incomingScreen extends listScreen {
 
     async render() {
         await super.render();
-        this.loadEntries();
 
         const q = FS.doc(db, "users", this.uid);
         const detachFn = FS.onSnapshot(q, async (snapshot) => {
@@ -34,12 +33,10 @@ export class incomingScreen extends listScreen {
                     let data = doc.data();
                     this.addNewCard(doc.id, data, false);
                 }
-
-                this.list = incoming;
             }
-                    
+            this.list = incoming;
         });
-
+        this.loadEntries();
         this.app.setDetachFunction(detachFn);
     }
 
@@ -122,6 +119,13 @@ export class incomingScreen extends listScreen {
                 console.log(err);
             }
         });
+
+        $("#reloadBtn").on("click", function(e){
+            e.preventDefault();
+            $("#entries").empty();
+            self.loadEntries();
+        });
+        
     }
 
     async addNewEntry(title, amount, date, id){
@@ -204,9 +208,11 @@ export class incomingScreen extends listScreen {
         }
     
         for (const doc of entries){
-            let data = doc.data();
-            let self = data['createdBy'] == data['to'];
-            this.addNewCard(doc.id, data, self);
+            if (doc){
+                let data = doc.data();
+                let self = data['createdBy'] == data['to'];
+                this.addNewCard(doc.id, data, self);
+            }
         }
     }
     

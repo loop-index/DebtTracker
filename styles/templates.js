@@ -32,7 +32,7 @@ function newEntryButton(name){
     return `
         <div class="dropdown my-2 px-2" id="newEntryDropdown">
             <div class="input-group w-100">
-                <button class="btn btn-secondary" type="button" id="newEntryBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn btn-outline-secondary" type="button" id="newEntryBtn" data-bs-toggle="dropdown" aria-expanded="false">
                     New ${name}
                 </button>
                 <form class="dropdown-menu p-4" id="newEntryForm">
@@ -54,6 +54,12 @@ function newEntryButton(name){
                     <button type="submit" id="newEntrySubmit" class="btn btn-primary">Create entry</button>
                 </form>
                 <input type="text" class="form-control text-end" id="search" placeholder="Search" autocomplete="off">
+                <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                    <i class="fa-solid fa-search"></i>
+                </button>
+                <button class="btn btn-outline-secondary" type="button" id="reloadBtn">
+                    <i class="fa-solid fa-sync"></i>
+                </button>
             </div>
         </div>
     `
