@@ -6,7 +6,6 @@ export function login(email, password) {
     signInWithEmailAndPassword(AU, email, password).then((userCredential) => {
         saveCache(userCredential);
 
-        console.log("Logged in");
         router.navigate("/");
     }).catch((error) => {
         let errorCode = error.code;

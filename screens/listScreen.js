@@ -8,6 +8,7 @@ export class listScreen {
         this.uid;
         this.list = [];
         this.knownUsers = {};
+        this.curEntryIndex = 0;
         this.perPage = 7;
         this.curUserRef;
         this.template;
@@ -34,14 +35,23 @@ export class listScreen {
     }
 
     attachHandlers() {
+        let self = this;
         $("#signOut").on("click", function(e){
             e.preventDefault();
             localStorage.removeItem("token");
             localStorage.removeItem("uid");
             signOut(AU).then(() => {
-                console.log("Signed out");
                 router.navigate("/login");
             });
+            self.app.reset();
+        });
+
+        $("#loadMoreBtn").on("click", function(e){
+            e.preventDefault();
+            if (-self.curEntryIndex + self.perPage < self.list.length){
+                self.curEntryIndex -= self.perPage;
+                self.loadEntries(true);
+            }
         });
     }
 }

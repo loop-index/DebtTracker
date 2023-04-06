@@ -192,14 +192,14 @@ export class incomingScreen extends listScreen {
         card.fadeIn();
     
         // If there are more than 7 entries, remove the last one
-        if ($("#entries").children().length > this.perPage){
-            $("#entries").children().last().remove();
-        }
+        // if ($("#entries").children().length > this.perPage){
+        //     $("#entries").children().last().remove();
+        // }
     }
     
     
-    async loadEntries(){
-        const page = this.list.slice(-this.perPage);
+    async loadEntries(append=false){
+        const page = this.list.slice(this.curEntryIndex-this.perPage, this.list.length+this.curEntryIndex);
         const entries = [];
     
         for (const docId of page){
@@ -211,7 +211,7 @@ export class incomingScreen extends listScreen {
             if (doc){
                 let data = doc.data();
                 let self = data['createdBy'] == data['to'];
-                this.addNewCard(doc.id, data, self);
+                this.addNewCard(doc.id, data, self, append);
             }
         }
     }

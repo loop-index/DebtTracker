@@ -9,7 +9,6 @@ export function loadMainView(){
 }
 
 export function loadLoginView(){
-    console.log('Now on login page');
     app.html(loginView);
 
     $("#loginForm").submit(function(e){
@@ -27,7 +26,6 @@ export function loadLoginView(){
 }
 
 export function loadSignupView(){
-    console.log('Now on signup page');
     app.html(signupView);
 
     $("#signupForm").submit(function(e){

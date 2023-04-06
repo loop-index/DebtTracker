@@ -8,36 +8,41 @@ export class App {
         this.title = 'App';
         this.uid;
         this.curUserRef;
-        this.knownUsers = {};
+        this.knownUsers;
         this.outgoingScreen;
         this.incomingScreen;
         this.detachListenerFn = () => {};
     }
 
     async init(callback) {
+        console.log(callback)
+        if (this.uid) {
+            return;
+        }
         await onAuthStateChanged(AU, async (user) => {
             if (user) {
                 this.uid = user.uid;
                 this.curUserRef = await FS.doc(db, "users", this.uid);
-                
                 const curUserDoc = await FS.getDoc(this.curUserRef);
-
                 this.knownUsers = curUserDoc.data().knownUsers;
 
-                callback();
+                if (callback){
+                    callback();
+                    callback = null;
+                }
             }
             else {
                 router.navigate("/login");
                 return;
             }
         });
-        console.log("App initialized");
     }
 
     async getKnownUsers() {
         if (!this.knownUsers) {
-            const curUserDoc = await FS.getDoc(curUserRef);
-            this.knownUsers = curUserDoc.data().knownUsers;
+            let self = this;
+            const curUserDoc = await FS.getDoc(self.curUserRef);
+            self.knownUsers = curUserDoc.data().knownUsers;
         }
         return this.knownUsers;
     }
@@ -101,16 +106,18 @@ export class App {
 
     async getOutgoingScreen() {
         if (!this.outgoingScreen) {
-            this.outgoingScreen = new outgoingScreen(this);
-            await this.outgoingScreen.init('outgoingTransactions');
+            let self = this;
+            self.outgoingScreen = new outgoingScreen(self);
+            await self.outgoingScreen.init('outgoingTransactions');
         }
         return this.outgoingScreen;
     }
 
     async getIncomingScreen() {
         if (!this.incomingScreen) {
-            this.incomingScreen = new incomingScreen(this);
-            await this.incomingScreen.init('incomingTransactions');
+            let self = this;
+            self.incomingScreen = new incomingScreen(self);
+            await self.incomingScreen.init('incomingTransactions');
         }
         return this.incomingScreen;
     }
@@ -121,6 +128,16 @@ export class App {
 
     detachCurrentListener() {
         this.detachListenerFn();
+    }
+
+    reset() {
+        this.detachCurrentListener();
+        this.uid = null;
+        this.curUserRef = null;
+        this.knownUsers = null;
+        this.outgoingScreen = null;
+        this.incomingScreen = null;
+        this.detachListenerFn = () => {};
     }
 
 }

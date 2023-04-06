@@ -5,7 +5,7 @@ import { App } from "/screens/app.js";
 
 export default async function init(){
     const appPanel = $('#content');
-    
+
     // Initial Navigo
     var root = '/';
     var useHash = true; // Defaults to: false
@@ -23,20 +23,20 @@ export default async function init(){
 
     // Set up routes
     function setupRoutes() {
+        console.log("setupRoutes")
         window.router.on({
             '/': () => {
                 router.navigate('/outgoing');
             },
             '/outgoing': async () => {
                 loadNav();
-                console.log('Now on first page');
+                await app.init(null);
                 outgoingScreen = await app.getOutgoingScreen();
                 await outgoingScreen.render();
-                // loadMyView();
             },
             '/incoming': async () => {
                 loadNav();
-                console.log('Now on second page');
+                await app.init(null);
                 incomingScreen = await app.getIncomingScreen();
                 await incomingScreen.render();
             },

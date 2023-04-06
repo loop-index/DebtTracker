@@ -10,6 +10,9 @@ export function outView (name, image) {
     ${ newEntryButton("Entry") }
     <div class="container-fluid overflow-auto px-0" id="entries">
     </div>
+    <div class="d-flex justify-content-center">
+        <button class="btn btn-outline-secondary" id="loadMoreBtn">Load More</button>
+    </div>
     `
 }
 
@@ -24,6 +27,9 @@ export function inView (name, image) {
     </div>
     ${ newEntryButton("Request") }
     <div class="container-fluid overflow-auto px-0" id="entries">
+    </div>
+    <div class="d-flex justify-content-center">
+        <button class="btn btn-outline-secondary" id="loadMoreBtn">Load More</button>
     </div>
     `
 }
