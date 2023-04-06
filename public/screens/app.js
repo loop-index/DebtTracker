@@ -93,7 +93,7 @@ export class App {
             }
         }
     
-        image = image === "" ? `https://api.dicebear.com/5.x/big-smile/svg?size=48&backgroundColor=fbc324&seed=${id.slice(1)}` : image;
+        image = image === "" ? `https://api.dicebear.com/5.x/lorelei/svg?size=48&backgroundColor=fbc324&seed=${id.slice(1)}` : image;
     
         this.updateKnownUsers(id, {
             name: name,

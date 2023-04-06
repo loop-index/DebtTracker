@@ -1,4 +1,4 @@
-import { matchDropdown } from "/styles/components.js";
+import { matchDropdown } from "./styles/components.js";
 
 // Create our number formatter.
 export const formatter = new Intl.NumberFormat('en-US', {
@@ -56,6 +56,40 @@ export function autocomplete(input, arrayFn) {
             });
         });
     }
+
+    //Arrow keys for navigation
+    $(input).on("keydown", function (e) {
+        if ($("#matches").length == 0) return;
+
+        if (e.key == "ArrowDown") {
+            e.preventDefault();
+            e.stopPropagation();
+            let active = $("#matches").find(".active");
+            if (active.length == 0) {
+                $("#matches").find("button").first().addClass("active");
+            } else {
+                active.removeClass("active");
+                active.next().addClass("active");
+            }
+        } else if (e.key == "ArrowUp") {
+            e.preventDefault();
+            e.stopPropagation();
+            let active = $("#matches").find(".active");
+            if (active.length == 0) {
+                $("#matches").find("button").last().addClass("active");
+            } else {
+                active.removeClass("active");
+                active.prev().addClass("active");
+            }
+        } else if (e.key == "Enter") {
+            e.preventDefault();
+            e.stopPropagation();
+            let active = $("#matches").find(".active");
+            if (active.length != 0) {
+                active.trigger("click");
+            }
+        }
+    });
 }
 
 export function validateInputs(title, amount, to){

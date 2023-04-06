@@ -1,5 +1,6 @@
 import { loginView, mainView, signupView } from "../styles/templates.js";
 import { checkToken, login, signup } from "../screens/auth.js"
+import { AU } from "../firebase.js";
 
 const app = $("#content");
 
@@ -9,6 +10,11 @@ export function loadMainView(){
 }
 
 export function loadLoginView(){
+    if (AU.currentUser != null) {
+        router.navigate("/");
+        return;
+    }
+
     app.html(loginView);
 
     $("#loginForm").submit(function(e){

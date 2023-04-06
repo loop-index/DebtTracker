@@ -1,13 +1,14 @@
 // import { loadMyView } from "/screens/mine.js";
-import { loadMainView, loadLoginView, loadSignupView } from "/screens/default.js";
-import { loadNav } from "/screens/sidenav.js";
-import { App } from "/screens/app.js";
+import { loadMainView, loadLoginView, loadSignupView } from "./screens/default.js";
+import { loadNav } from "./screens/sidenav.js";
+import { App } from "./screens/app.js";
 
 export default async function init(){
     const appPanel = $('#content');
 
     // Initial Navigo
-    var root = '/';
+    var dir = window.location.pathname.split('/')[1];
+    var root = '/' + (dir == 'public' ? dir : '');
     var useHash = true; // Defaults to: false
     var hash = '#'; // Defaults to: '#'
     window.router = new Navigo(root, useHash, hash);
@@ -45,7 +46,8 @@ export default async function init(){
         }).resolve();
         
         window.router.notFound((query) => {
-            appPanel.innerHTML = '404 - Page not found';
+            console.log('Not found');
+            router.navigate('/');
         });
     }
 

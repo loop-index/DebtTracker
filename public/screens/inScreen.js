@@ -1,14 +1,14 @@
 import { listScreen } from './listScreen.js';
 import { FS, db } from '../firebase.js';
-import { newCard, outCardExtension, infoCard, attachControls } from '../styles/components.js';
+import { newCard, inCardExtension, infoCard, attachControls } from '../styles/components.js';
 import { validateInputs, autocomplete } from '../utils.js';
-import { outView } from '../styles/templates.js';
+import { inView } from '../styles/templates.js';
 
-export class outgoingScreen extends listScreen {
+export class incomingScreen extends listScreen {
     constructor(app) {
         super(app);
         this.title = 'Out Screen';
-        this.template = outView;
+        this.template = inView;
     }
 
     async render() {
@@ -16,27 +16,26 @@ export class outgoingScreen extends listScreen {
 
         const q = FS.doc(db, "users", this.uid);
         const detachFn = FS.onSnapshot(q, async (snapshot) => {
-            console.log("Changed");
-            const incoming = snapshot.get('outgoingTransactions');
+            // console.log("Changed");
+            // const incoming = snapshot.get('incomingTransactions');
 
-            // Only load new entries
-            if (incoming.length > this.list.length) {
-                const newEntries = incoming.slice(this.list.length);
-                const entries = [];
+            // // Only load new entries
+            // if (incoming.length > this.list.length) {
+            //     const newEntries = incoming.slice(this.list.length);
+            //     const entries = [];
                 
-                for (const docId of newEntries){
-                    let doc = await FS.getDoc(FS.doc(db, "transactions", docId));
-                    entries.push(doc);
-                }
+            //     for (const docId of newEntries){
+            //         let doc = await FS.getDoc(FS.doc(db, "transactions", docId));
+            //         entries.push(doc);
+            //     }
             
-                for (const doc of entries){
-                    let data = doc.data();
-                    this.addNewCard(doc.id, data, false);
-                }
-            }
-            this.list = incoming;
+            //     for (const doc of entries){
+            //         let data = doc.data();
+            //         this.addNewCard(doc.id, data, false);
+            //     }
+            // }
+            // this.list = incoming;
         });
-
         this.loadEntries();
         this.app.setDetachFunction(detachFn);
     }
@@ -113,7 +112,7 @@ export class outgoingScreen extends listScreen {
                 if (docId){
                     let doc = await FS.getDoc(FS.doc(db, "transactions", docId));
                     let data = doc.data();
-                    let isSelf = data['createdBy'] == self.uid;
+                    let isSelf = data['createdBy'] == data['to'];
                     self.addNewCard(docId, data, isSelf, true);
                 }
             } catch (err) {
@@ -126,23 +125,23 @@ export class outgoingScreen extends listScreen {
             $("#entries").empty();
             self.loadEntries();
         });
+        
     }
 
     async addNewEntry(title, amount, date, id){
         let history = [new Date().toLocaleString() + ": " + "Created."];
-        console.log(this.uid);
-
-        let data = {
-            from: this.uid,
-            to: id,
+    
+        const data = {
+            from: id,
+            to: this.uid,
             title: title,
             amount: amount,
             date: date,
             history: history,
             createdBy: this.uid,
-            status: ""
+            status: "pending",
         }
-    
+
         const docRef = await FS.addDoc(FS.collection(db, "transactions"), data);
         
         this.addNewCard(docRef.id, data, true);
@@ -151,7 +150,7 @@ export class outgoingScreen extends listScreen {
         console.log("Document written with ID: ", docRef.id);
         
         FS.updateDoc(this.curUserRef, {
-            outgoingTransactions: FS.arrayUnion(docRef.id),
+            incomingTransactions: FS.arrayUnion(docRef.id),
         });
     
         this.toRecipient(id, docRef.id);
@@ -160,9 +159,18 @@ export class outgoingScreen extends listScreen {
     
     async addNewCard(id, data, self, append=false){
         let card;
-        let to = data['to'];
-        let name = "to " + this.knownUsers[to].name;
-        let image = this.knownUsers[to].image;
+        let from = data['from'];
+        let name = "from ";
+        let image;
+
+        if (!this.knownUsers[from]){
+            let doc = await FS.getDoc(FS.doc(db, "users", from));
+            name += doc.data()['email'];
+            image = doc.data()['image'];
+        } else {
+            name += this.knownUsers[from].name;
+            image = this.knownUsers[from].image;
+        }
     
         if (!append){
             card = $(newCard(data, name, image)).prependTo($("#entries"));
@@ -177,9 +185,9 @@ export class outgoingScreen extends listScreen {
             $(".card-active").removeClass("card-active");
             $(this).addClass("card-active");
     
-            const controls = $(outCardExtension(self)).appendTo($(this));
+            const controls = $(inCardExtension(self)).appendTo($(this));
             // controls.slideDown("fast");
-            attachControls($(this), controls, id, false);
+            attachControls($(this), controls, id, true);
         });
         card.fadeIn();
     
@@ -202,8 +210,8 @@ export class outgoingScreen extends listScreen {
         for (const doc of entries){
             if (doc){
                 let data = doc.data();
-                let isSelf = data['createdBy'] == this.uid;
-                this.addNewCard(doc.id, data, isSelf, append);
+                let self = data['createdBy'] == data['to'];
+                this.addNewCard(doc.id, data, self, append);
             }
         }
     }
@@ -212,7 +220,7 @@ export class outgoingScreen extends listScreen {
         if (!receiverId || receiverId[0] == "#") return;
         const rDoc = await FS.getDoc(FS.doc(db, "users", receiverId));
         FS.updateDoc(rDoc.ref, {
-            incomingTransactions: FS.arrayUnion(docId),
+            outgoingTransactions: FS.arrayUnion(docId),
         });
     }
 }

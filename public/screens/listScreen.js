@@ -38,8 +38,6 @@ export class listScreen {
         let self = this;
         $("#signOut").on("click", function(e){
             e.preventDefault();
-            localStorage.removeItem("token");
-            localStorage.removeItem("uid");
             signOut(AU).then(() => {
                 router.navigate("/login");
             });
