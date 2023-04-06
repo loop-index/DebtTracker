@@ -15,7 +15,6 @@ export class App {
     }
 
     async init(callback) {
-        console.log(callback)
         if (this.uid) {
             return;
         }

@@ -39,7 +39,8 @@ function newEntryButton(name){
         <div class="dropdown my-2 px-2" id="newEntryDropdown">
             <div class="input-group w-100">
                 <button class="btn btn-outline-secondary" type="button" id="newEntryBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                    New ${name}
+                    <span class="d-none d-sm-block">New ${name}</span>
+                    <i class="fa-solid fa-plus d-block d-sm-none"></i>
                 </button>
                 <form class="dropdown-menu p-4" id="newEntryForm">
                     <input type="text" class="form-control mb-2 vw-30" placeholder="Title">

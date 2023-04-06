@@ -23,7 +23,6 @@ export default async function init(){
 
     // Set up routes
     function setupRoutes() {
-        console.log("setupRoutes")
         window.router.on({
             '/': () => {
                 router.navigate('/outgoing');
