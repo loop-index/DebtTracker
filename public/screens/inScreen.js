@@ -14,6 +14,8 @@ export class incomingScreen extends listScreen {
     async render() {
         await super.render();
 
+        await this.updateList("incomingTransactions");
+
         const q = FS.doc(db, "users", this.uid);
         const detachFn = FS.onSnapshot(q, async (snapshot) => {
             // console.log("Changed");
@@ -120,10 +122,12 @@ export class incomingScreen extends listScreen {
             }
         });
 
-        $("#reloadBtn").on("click", function(e){
+        $("#reloadBtn").on("click", async function(e){
             e.preventDefault();
             $("#entries").empty();
+            await self.updateList("incomingTransactions");
             self.loadEntries(self.list);
+            $(this).find(".badge").remove();
         });
         
     }
@@ -139,13 +143,14 @@ export class incomingScreen extends listScreen {
             date: date,
             history: history,
             createdBy: this.uid,
-            status: "pending",
+            status: "requested",
         }
 
         const docRef = await FS.addDoc(FS.collection(db, "transactions"), data);
         
         this.addNewCard(docRef.id, data, true);
-        this.list.push(docRef.id);
+        data.id = docRef.id;
+        this.list.push(data);
     
         console.log("Document written with ID: ", docRef.id);
         
@@ -200,18 +205,11 @@ export class incomingScreen extends listScreen {
     
     async loadEntries(list, append=false){
         const page = list.slice(this.curEntryIndex-this.perPage, list.length+this.curEntryIndex);
-        const entries = [];
-    
-        for (const docId of page){
-            let doc = await FS.getDoc(FS.doc(db, "transactions", docId));
-            entries.push(doc);
-        }
-    
-        for (const doc of entries){
+
+        for (const doc of page){
             if (doc){
-                let data = doc.data();
-                let self = data['createdBy'] == data['to'];
-                this.addNewCard(doc.id, data, self, append);
+                let isSelf = doc['createdBy'] == doc.to;
+                this.addNewCard(doc.id, doc, isSelf, append);
             }
         }
     }

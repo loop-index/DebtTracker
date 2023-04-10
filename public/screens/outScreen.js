@@ -14,26 +14,22 @@ export class outgoingScreen extends listScreen {
     async render() {
         await super.render();
 
+        await this.updateList("outgoingTransactions");
+
         const q = FS.doc(db, "users", this.uid);
         const detachFn = FS.onSnapshot(q, async (snapshot) => {
             // console.log("Changed");
-            // const incoming = snapshot.get('outgoingTransactions');
+            const incoming = snapshot.get('outgoingTransactions');
 
-            // // Only load new entries
-            // if (incoming.length > this.list.length) {
-            //     const newEntries = incoming.slice(this.list.length);
-            //     const entries = [];
-                
-            //     for (const docId of newEntries){
-            //         let doc = await FS.getDoc(FS.doc(db, "transactions", docId));
-            //         entries.push(doc);
-            //     }
-            
-            //     for (const doc of entries){
-            //         let data = doc.data();
-            //         this.addNewCard(doc.id, data, false);
-            //     }
-            // }
+            // Only load new entries
+            if (incoming.length > this.list.length) {
+                $("#reloadBtn").append(`
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    ${incoming.length - this.list.length}
+                    <span class="visually-hidden">unread messages</span>
+                </span>
+                `);
+            }
             // this.list = incoming;
         });
 
@@ -121,10 +117,12 @@ export class outgoingScreen extends listScreen {
             }
         });
 
-        $("#reloadBtn").on("click", function(e){
+        $("#reloadBtn").on("click", async function(e){
             e.preventDefault();
             $("#entries").empty();
+            await self.updateList("outgoingTransactions");
             self.loadEntries(self.list);
+            $(this).find(".badge").remove();
         });
     }
 
@@ -146,7 +144,8 @@ export class outgoingScreen extends listScreen {
         const docRef = await FS.addDoc(FS.collection(db, "transactions"), data);
         
         this.addNewCard(docRef.id, data, true);
-        this.list.push(docRef.id);
+        data.id = docRef.id;
+        this.list.push(data);
     
         console.log("Document written with ID: ", docRef.id);
         
@@ -192,18 +191,11 @@ export class outgoingScreen extends listScreen {
     
     async loadEntries(list, append=false){
         const page = list.slice(this.curEntryIndex-this.perPage, list.length+this.curEntryIndex);
-        const entries = [];
-    
-        for (const docId of page){
-            let doc = await FS.getDoc(FS.doc(db, "transactions", docId));
-            entries.push(doc);
-        }
-    
-        for (const doc of entries){
+
+        for (const doc of page){
             if (doc){
-                let data = doc.data();
-                let isSelf = data['createdBy'] == this.uid;
-                this.addNewCard(doc.id, data, isSelf, append);
+                let isSelf = doc['createdBy'] == this.uid;
+                this.addNewCard(doc.id, doc, isSelf, append);
             }
         }
     }

@@ -1,14 +1,16 @@
 export function outView (name, image) {
     return `
-    <div class="d-flex justify-content-between align-items-center px-2 pt-2">
-        <div>
-            <h1 class="text-start my-0">Outgoing</h1>
-            <small class="text-start my-0 ps-1">What you owe to other people.</small>
+    <div class="sticky-top pb-2" style="background-color: white;">
+        <div class="d-flex justify-content-between align-items-center px-2 pt-2">
+            <div>
+                <h1 class="text-start my-0">Outgoing</h1>
+                <small class="text-start my-0 ps-1">What you owe to other people.</small>
+            </div>
+            ${ userInfo(name, image) }
         </div>
-        ${ userInfo(name, image) }
+        ${ newEntryButton("Entry") }
+        ${ filterMenu() }
     </div>
-    ${ newEntryButton("Entry") }
-    ${ filterMenu() }
     <div class="container-fluid overflow-auto px-0" id="entries">
     </div>
     <div class="d-flex justify-content-center">
@@ -19,15 +21,17 @@ export function outView (name, image) {
 
 export function inView (name, image) {
     return `
-    <div class="d-flex justify-content-between align-items-center px-2 pt-2">
-        <div>
-            <h1 class="text-start my-0">Incoming</h1>
-            <small class="text-start my-0 ps-1">What other people owe you.</small>
+    <div class="sticky-top pb-2" style="background-color: white;">
+        <div class="d-flex justify-content-between align-items-center px-2 pt-2">
+            <div>
+                <h1 class="text-start my-0">Incoming</h1>
+                <small class="text-start my-0 ps-1">What other people owe you.</small>
+            </div>
+            ${ userInfo(name, image) }
         </div>
-        ${ userInfo(name, image) }
+        ${ newEntryButton("Request") }
+        ${ filterMenu() }
     </div>
-    ${ newEntryButton("Request") }
-    ${ filterMenu() }
     <div class="container-fluid overflow-auto px-0" id="entries">
     </div>
     <div class="d-flex justify-content-center">
@@ -66,11 +70,11 @@ function newEntryButton(name){
                 <button class="btn btn-outline-secondary" type="button" id="searchBtn">
                     <i class="fa-solid fa-search"></i>
                 </button>
-                <button class="btn btn-outline-secondary" type="button" id="reloadBtn">
-                    <i class="fa-solid fa-sync"></i>
-                </button>
                 <button class="btn btn-outline-secondary" type="button" id="filterBtn" data-bs-toggle="collapse" data-bs-target="#filterMenu" aria-expanded="false" aria-controls="filterMenu">
                     <i class="fa-solid fa-filter"></i>
+                </button>
+                <button class="btn btn-outline-secondary" type="button" id="reloadBtn">
+                    <i class="fa-solid fa-sync"></i>
                 </button>
             </div>
         </div>
@@ -88,7 +92,7 @@ function filterMenu(){
                 <li><a class="dropdown-item" href="#">Title</a></li>
                 <li><a class="dropdown-item" href="#">Amount</a></li>
             </ul>
-            <button class="btn btn-outline-secondary" type="button">
+            <button class="btn btn-outline-secondary" type="button" id="sortOrder">
                 <i class="fa-solid fa-sort-amount-down"></i>
             </button>
         </div>
