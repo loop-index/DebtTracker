@@ -8,6 +8,7 @@ export function outView (name, image) {
         ${ userInfo(name, image) }
     </div>
     ${ newEntryButton("Entry") }
+    ${ filterMenu() }
     <div class="container-fluid overflow-auto px-0" id="entries">
     </div>
     <div class="d-flex justify-content-center">
@@ -26,6 +27,7 @@ export function inView (name, image) {
         ${ userInfo(name, image) }
     </div>
     ${ newEntryButton("Request") }
+    ${ filterMenu() }
     <div class="container-fluid overflow-auto px-0" id="entries">
     </div>
     <div class="d-flex justify-content-center">
@@ -67,9 +69,30 @@ function newEntryButton(name){
                 <button class="btn btn-outline-secondary" type="button" id="reloadBtn">
                     <i class="fa-solid fa-sync"></i>
                 </button>
+                <button class="btn btn-outline-secondary" type="button" id="filterBtn" data-bs-toggle="collapse" data-bs-target="#filterMenu" aria-expanded="false" aria-controls="filterMenu">
+                    <i class="fa-solid fa-filter"></i>
+                </button>
             </div>
         </div>
     `
+}
+
+function filterMenu(){
+    return `
+        <div class="input-group w-100 my-2 px-2 collapse" id="filterMenu">
+            <button class="btn btn-outline-secondary dropdown-toggle" id="sortBy" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Date
+            </button>
+            <ul class="dropdown-menu" id="sortOptions">
+                <li><a class="dropdown-item" href="#">Date</a></li>
+                <li><a class="dropdown-item" href="#">Title</a></li>
+                <li><a class="dropdown-item" href="#">Amount</a></li>
+            </ul>
+            <button class="btn btn-outline-secondary" type="button">
+                <i class="fa-solid fa-sort-amount-down"></i>
+            </button>
+        </div>
+        `
 }
 
 function userInfo(name, image){

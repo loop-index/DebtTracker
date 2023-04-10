@@ -37,7 +37,7 @@ export class outgoingScreen extends listScreen {
             // this.list = incoming;
         });
 
-        this.loadEntries();
+        this.loadEntries(this.list);
         this.app.setDetachFunction(detachFn);
     }
 
@@ -124,7 +124,7 @@ export class outgoingScreen extends listScreen {
         $("#reloadBtn").on("click", function(e){
             e.preventDefault();
             $("#entries").empty();
-            self.loadEntries();
+            self.loadEntries(self.list);
         });
     }
 
@@ -190,8 +190,8 @@ export class outgoingScreen extends listScreen {
     }
     
     
-    async loadEntries(append=false){
-        const page = this.list.slice(this.curEntryIndex-this.perPage, this.list.length+this.curEntryIndex);
+    async loadEntries(list, append=false){
+        const page = list.slice(this.curEntryIndex-this.perPage, list.length+this.curEntryIndex);
         const entries = [];
     
         for (const docId of page){

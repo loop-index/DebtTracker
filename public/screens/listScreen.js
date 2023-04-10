@@ -14,6 +14,7 @@ export class listScreen {
         this.template;
         this.username;
         this.userimage;
+        this.sender;
     }
 
     async init(listName) {
@@ -36,6 +37,7 @@ export class listScreen {
 
     attachHandlers() {
         let self = this;
+        let filteredList = [];
         $("#signOut").on("click", function(e){
             e.preventDefault();
             signOut(AU).then(() => {
@@ -48,8 +50,21 @@ export class listScreen {
             e.preventDefault();
             if (-self.curEntryIndex + self.perPage < self.list.length){
                 self.curEntryIndex -= self.perPage;
-                self.loadEntries(true);
+                self.loadEntries(self.list, true);
             }
         });
+
+        $("#sortOptions").on("click", "a", async function(e){
+            e.preventDefault();
+            let sort = $(e.target).text();
+            $("#sortBy").text(sort);
+
+            // if (filter == "Date"){
+            //     filteredList = self.list;
+            // } else {
+            //     filteredList 
+            // }
+        });
     }
+
 }
